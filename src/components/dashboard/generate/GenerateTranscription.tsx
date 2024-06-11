@@ -104,35 +104,6 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
     }
   };
 
-  async function fetchVoiceTranscriptions(audioUrl: string, apiKey: string) {
-    // Construct the encoded URL
-    const baseUrl = 'https://qweybwlsnjkgrabqdeov.supabase.co/rest/v1/voice_transcriptions';
-    const queryParams = `?select=*&audio_url=eq.${encodeURIComponent(audioUrl)}`;
-    const requestUrl = `${baseUrl}${queryParams}`;
-
-    try {
-      const response = await fetch(requestUrl, {
-        method: 'GET',
-        headers: {
-          apikey: apiKey, // Your Supabase anonpublic API key
-          Authorization: `Bearer ${apiKey}`, // Auth header with API key
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Voice Transcriptions inside FETCH VOICE TRANS FUNCTION:', data);
-      return data;
-    } catch (error) {
-      console.error('Error fetching voice transcriptions:', error);
-      throw error;
-    }
-  }
-
   useEffect(() => {
     console.log('INDISE USE EFFECT');
 
@@ -155,57 +126,6 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
     };
     return () => {};
   }, [stateDB, supabase]);
-
-  // Polling function to check for updates
-  const pollForUpdates = async (audioUrl: string) => {
-    console.log('POLL UPDATES URL:', audioUrl);
-    try {
-      const { data, error } = await supabase
-        .from('voice_transcriptions')
-        .select('*')
-        .eq('audio_url', audioUrl)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        if (data.error) {
-          errorToast(data.error);
-        } else {
-          console.log('GOT the data');
-          console.log('DATA:', data);
-        }
-      }
-    } catch (error) {
-      console.error('Error polling for updates:', error);
-    }
-
-    return false; // Continue polling
-  };
-
-  // Start polling for updates
-  const startPolling = (audioUrl: string) => {
-    const interval = setInterval(async () => {
-      console.log('Polling check');
-      const stopPolling = await pollForUpdates(audioUrl);
-      if (stopPolling) {
-        clearInterval(interval);
-      }
-    }, 3000);
-  };
-
-  function convertUrlFormat(inputUrl: string) {
-    // Split the URL into base and path components
-    const base_url = inputUrl.split('/storage/v1/object/public/')[0];
-    const path_url = '/storage/v1/object/public/' + inputUrl.split('/storage/v1/object/public/')[1];
-
-    // Construct the formatted URL
-    const formatted_url = `${base_url}\r\n${path_url}`;
-
-    return formatted_url;
-  }
 
   // Memoize handleRecording with an extra step to control repetitive calls.
   const stableHandleRecording = useCallback(
