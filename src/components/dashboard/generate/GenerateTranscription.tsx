@@ -133,19 +133,6 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
     }
   }
 
-  // Example usage
-  // const audioUrl2 = 'https://qweybwlsnjkgrabqdeov.supabase.co/storage/v1/object/public/audio/1718018450818-audio.mp3';
-  // const formatCheck = convertUrlFormat(audioUrl2);
-  // const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3ZXlid2xzbmprZ3JhYnFkZW92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4MTAxOTUsImV4cCI6MjAzMjM4NjE5NX0.g2N-K16BCzJUvQEhK2rI8exFjFKPPh1CVgHjiaTyi9E'; // Replace with your actual Supabase anonpublic API key
-
-  // fetchVoiceTranscriptions(formatCheck, apiKey)
-  //   .then((data) => {
-  //     console.log('Fetched data:', data);
-  //   })
-  //   .catch((error) => {
-  //     console.error('Failed to fetch data:', error);
-  //   });
-
   useEffect(() => {
     console.log('INDISE USE EFFECT');
 
