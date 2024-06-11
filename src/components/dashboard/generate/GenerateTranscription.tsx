@@ -72,7 +72,6 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
       setStatus('Getting your transcription ready');
       setTranscriptionId('newID');
       setStatus('Getting your transcription ready');
-
     } catch (error) {
       errorToast(`${error}`);
       setIsPending(false);
