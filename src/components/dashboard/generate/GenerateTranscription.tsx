@@ -73,34 +73,6 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
       setTranscriptionId('newID');
       setStatus('Getting your transcription ready');
 
-      const formatNew = convertUrlFormat(audioUrl);
-      const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3ZXlid2xzbmprZ3JhYnFkZW92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4MTAxOTUsImV4cCI6MjAzMjM4NjE5NX0.g2N-K16BCzJUvQEhK2rI8exFjFKPPh1CVgHjiaTyi9E'; // Replace with your actual Supabase anonpublic API key
-
-      console.log("FORMAT NEW URL:", formatNew)
-      // setTimeout(() => {
-      //   fetchVoiceTranscriptions(formatNew, anonKey)
-      //     .then((data) => {
-      //       console.log('LAST RECORDING:', data);
-      //     })
-      //     .catch((error) => {
-      //       console.error('RECORDING ERROR:', error);
-      //     });
-      // }, 5000);
-
-      const intervalId = setInterval(() => {
-        fetchVoiceTranscriptions(audioUrl, anonKey)
-          .then((data) => {
-            console.log('LAST RECORDING:', data);
-          })
-          .catch((error) => {
-            console.error('RECORDING ERROR:', error);
-          });
-      }, 5000);
-
-      // console.log("AUDIO URL:", audioUrl);
-      // startPolling(audioUrl);
-      // const formattedUrl = convertUrlFormat(audioUrl);
-      // startPolling(formattedUrl);
     } catch (error) {
       errorToast(`${error}`);
       setIsPending(false);
@@ -108,17 +80,25 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
   };
 
   const handleRecordInserted = (payload: any) => {
-    if (payload.new.transcription_id === transcriptionId) {
+    console.log('inside handleRecordInserted');
+    if (payload.new) {
       console.log('New record inserted:', payload.new);
       // Handle the inserted record
+      setStateDB('insert');
     }
-    setStateDB('insert');
   };
 
   const handleRecordUpdated = (payload: any) => {
+    console.log('inside handleRecordUpdated');
     if (payload.new) {
       console.log('Record updated:', payload.new);
       // Handle the updated record
+      //setContent
+      setContent((prevContent) => ({
+        transcription: payload.new.transcription,
+        summary: payload.new.summary,
+        created_at: payload.new.created_at,
+      }));
       setStateDB('update');
       setIsPending(false);
     }
@@ -166,19 +146,28 @@ const GenerateTranscription: FC<GenerateTranscriptionProps> = () => {
   //     console.error('Failed to fetch data:', error);
   //   });
 
-  // useEffect(() => {
-  //   console.log("INDISE USE EFFECT")
+  useEffect(() => {
+    console.log('INDISE USE EFFECT');
 
-  //   const channel = supabase
-  //     .channel('value-db-changes')
-  //     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'voice_transcriptions' }, handleRecordInserted)
-  //     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'voice_transcriptions' }, handleRecordUpdated)
-  //     .subscribe();
+    const channel = supabase
+      .channel('value-db-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'voice_transcriptions' },
+        handleRecordInserted
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'voice_transcriptions' },
+        handleRecordUpdated
+      )
+      .subscribe();
 
-  //   return () => {
-  //     supabase.removeChannel(channel);
-  //   };
-  // }, [stateDB,supabase]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    return () => {};
+  }, [stateDB, supabase]);
 
   // Polling function to check for updates
   const pollForUpdates = async (audioUrl: string) => {
